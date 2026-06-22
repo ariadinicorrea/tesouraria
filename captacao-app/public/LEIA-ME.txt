@@ -1,0 +1,3 @@
+Coloque aqui o arquivo do seu logo com o nome:  logo.png
+(também aceita logo.jpg, logo.jpeg, logo.svg ou logo.webp)
+Ele aparece automaticamente no topo do Relatório do Investidor.

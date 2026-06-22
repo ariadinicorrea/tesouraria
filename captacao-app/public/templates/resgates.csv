@@ -1,0 +1,4 @@
+documento_investidor;empresa;data_aporte;data_resgate;tipo_resgate;valor_principal;valor_juros;status
+12345678900;Fundo 1;2024-03-01;2025-06-10;total;;;efetuado
+12345678000190;Securitizadora;;2025-06-15;parcial;100000;5000;efetuado
+12345678900;Fundo 1;;2025-06-20;apenas_juros;;;solicitado

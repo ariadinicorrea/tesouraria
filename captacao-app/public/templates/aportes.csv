@@ -1,0 +1,3 @@
+documento_investidor;empresa;instrumento;data_aporte;valor_aporte;modalidade;percentual_cdi;taxa_valor;periodo_taxa;agente_documento;comissao_percent;quantidade_cotas;valor_cota_aporte
+12345678900;Fundo 1;Cotas de FIDC;2024-03-01;500000;percentual_cdi;1.10;;;98765432100;0,02;500;1000
+12345678000190;Securitizadora;Debêntures;2024-04-10;1000000;cdi_mais;;0.02;anual;;;;

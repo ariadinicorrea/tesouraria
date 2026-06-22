@@ -1,0 +1,3 @@
+nome;documento;tipo_pessoa;email;telefone;data_ingresso;banco;agencia;conta;chave_pix
+João da Silva;12345678900;PF;joao@email.com;11999990000;2024-01-15;Banco do Brasil;0001;12345-6;joao@email.com
+Empresa XYZ Ltda;12345678000190;PJ;contato@xyz.com;1133334444;2024-02-01;Itaú;1234;99887-7;12345678000190
