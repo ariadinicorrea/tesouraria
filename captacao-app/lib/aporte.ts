@@ -86,7 +86,7 @@ export async function computeAportesAtivos(): Promise<AporteAtual[]> {
   const selicS = await selicSerie();
   const { data } = await supabaseAdmin.from("aportes")
     .select(`*, empresas!inner(nome, tipo, regime_tributario), investidores!inner(nome_razao_social), instrumentos_financeiros!inner(baseado_em_cotas, isento_ir)`)
-    .eq("status", "ativo").order("data_aporte", { ascending: false });
+    .eq("status", "ativo").order("created_at", { ascending: false });
   const out: AporteAtual[] = [];
   for (const a of data ?? []) out.push(await calcular(a, cdi, serie, selic, selicS));
   return out;

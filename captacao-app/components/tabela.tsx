@@ -25,7 +25,7 @@ export type Coluna = {
   acao?: { rotulo: string; base: string; metodo?: string; confirmar?: string };
 };
 
-export function Tabela({ colunas, linhas, inicial = 25, vazio = "Nada encontrado." }: {
+export function Tabela({ colunas, linhas, inicial = 1000, vazio = "Nada encontrado." }: {
   colunas: Coluna[]; linhas: any[]; inicial?: number; vazio?: string;
 }) {
   const router = useRouter();
