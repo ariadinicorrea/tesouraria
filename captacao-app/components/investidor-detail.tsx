@@ -19,7 +19,7 @@ export function InvestidorDetail({ investidor }: { investidor: any }) {
     const res = await fetch(`/api/investidores/${investidor.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(f) });
     const j = await res.json();
     if (!j.ok) return setErro(j.erro);
-    setEditando(false); setMsg("Dados atualizados."); router.refresh();
+    window.location.reload();
   }
   async function excluir() {
     if (!confirm("Excluir este investidor? Esta ação não pode ser desfeita.")) return;
@@ -27,7 +27,7 @@ export function InvestidorDetail({ investidor }: { investidor: any }) {
     const res = await fetch(`/api/investidores/${investidor.id}`, { method: "DELETE" });
     const j = await res.json();
     if (!j.ok) return setErro(j.erro);
-    router.push("/investidores"); router.refresh();
+    window.location.href = "/investidores";
   }
   return (
     <div className="mt-6 rounded-lg border bg-surface p-5 no-print">

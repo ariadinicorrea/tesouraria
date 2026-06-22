@@ -63,7 +63,7 @@ export function Tabela({ colunas, linhas, inicial = 1000, vazio = "Nada encontra
       const res = await fetch(c.acao!.base + id, { method: c.acao!.metodo || "DELETE" });
       let j: any = null; try { j = await res.json(); } catch {}
       if (!res.ok || (j && j.ok === false)) { alert((j && j.erro) || "Não foi possível concluir."); setBusyId(null); return; }
-      router.refresh();
+      window.location.reload();
     } catch (e: any) { alert("Erro: " + (e?.message || "")); }
     setBusyId(null);
   }
