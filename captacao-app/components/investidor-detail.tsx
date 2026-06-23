@@ -19,7 +19,7 @@ export function InvestidorDetail({ investidor }: { investidor: any }) {
     const res = await fetch(`/api/investidores/${investidor.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(f) });
     const j = await res.json();
     if (!j.ok) return setErro(j.erro);
-    window.location.reload();
+    window.location.href = window.location.pathname + "?_=" + Date.now();
   }
   async function excluir() {
     if (!confirm("Excluir este investidor? Esta ação não pode ser desfeita.")) return;
