@@ -12,6 +12,7 @@ export async function POST(req: Request) {
     nome: b.nome, documento: b.documento ? String(b.documento).replace(/\D/g, "") : null,
     email: b.email || null, telefone: b.telefone || null,
     comissao_padrao: (Number(String(b.comissao_padrao ?? "").replace(",", ".")) || 0) / 100,
+    ativo: b.ativo !== false,
   }).select().single();
   if (error) return NextResponse.json({ ok: false, erro: error.message }, { status: 400 });
   return NextResponse.json({ ok: true, agente: data });
