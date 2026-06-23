@@ -20,5 +20,16 @@ export async function POST(req: Request) {
   if (b.valor_cota_aporte) insert.valor_cota_aporte = Number(b.valor_cota_aporte);
   const { error, data } = await supabaseAdmin.from("aportes").insert(insert).select().single();
   if (error) return NextResponse.json({ ok: false, erro: error.message }, { status: 400 });
+
+  const cautelaIds = Array.isArray(b.cautela_ids) ? b.cautela_ids : [];
+  if (cautelaIds.length > 0 && data?.id) {
+    const { error: errC } = await supabaseAdmin.from("cautelas")
+      .update({ status: "vendida", aporte_id: data.id })
+      .in("id", cautelaIds);
+    if (errC) {
+      await supabaseAdmin.from("aportes").delete().eq("id", data.id);
+      return NextResponse.json({ ok: false, erro: "Falha ao vincular cautelas: " + errC.message }, { status: 400 });
+    }
+  }
   return NextResponse.json({ ok: true, aporte: data });
 }
