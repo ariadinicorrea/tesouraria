@@ -71,7 +71,6 @@ export function NovoAporte({ empresas, investidores, instrumentos, agentes, caut
             <input className={input} inputMode="decimal" value={f.valor_aporte} onChange={(e) => set("valor_aporte", e.target.value)} />
           )}
         </div>
-        <div><label className="eyebrow">Vencimento</label><input type="date" className={input} value={f.data_vencimento} onChange={(e) => set("data_vencimento", e.target.value)} /></div>
         <div><label className="eyebrow">Modalidade</label><select className={input} value={f.tipo_remuneracao} onChange={(e) => set("tipo_remuneracao", e.target.value)}><option value="percentual_cdi">% do CDI</option><option value="cdi_mais">CDI + spread</option><option value="selic_mais">Selic + spread</option><option value="fixa">Taxa fixa</option></select></div>
         {f.tipo_remuneracao === "percentual_cdi" ? (
           <div><label className="eyebrow">% do CDI (1.10 = 110%)</label><input className={input} inputMode="decimal" value={f.percentual_cdi} onChange={(e) => set("percentual_cdi", e.target.value)} placeholder="1.10" /></div>
