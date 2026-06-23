@@ -38,7 +38,7 @@ async function resgatesEfetuados(aporteId: string): Promise<{ bruto: number; pri
   return { bruto, principal };
 }
 
-async function calcular(a: any, cdi: number, serie: { data: string; taxa: number }[], selic: number, selicSerieArr: { data: string; taxa: number }[]): Promise<AporteAtual> {
+async function calcular(a: any, cdi: number, serie: { data: string; taxa: number }[], selic: number, selicSerieArr: { data: string; taxa: number }[], resgatesMap?: Map<string, { bruto: number; principal: number }>): Promise<AporteAtual> {
   const emp = Array.isArray(a.empresas) ? a.empresas[0] : a.empresas;
   const instr = Array.isArray(a.instrumentos_financeiros) ? a.instrumentos_financeiros[0] : a.instrumentos_financeiros;
   const inv = Array.isArray(a.investidores) ? a.investidores[0] : a.investidores;
@@ -57,7 +57,7 @@ async function calcular(a: any, cdi: number, serie: { data: string; taxa: number
   const diasCorridos = Math.floor((hoje.getTime() - dataAporte.getTime()) / 86400000);
   let saldoBruto = saldoBrutoHistorico(a.valor_aporte, params, String(a.data_aporte).slice(0, 10), serieIdx, idx, diasUteis);
   let rendimento = saldoBruto - a.valor_aporte;
-  const res = await resgatesEfetuados(a.id);
+  const res = resgatesMap ? (resgatesMap.get(a.id) ?? { bruto: 0, principal: 0 }) : await resgatesEfetuados(a.id);
   const principalVigente = a.valor_aporte - res.principal;
   saldoBruto -= res.bruto; if (saldoBruto < 0) saldoBruto = 0;
   rendimento = saldoBruto - principalVigente; if (rendimento < 0) rendimento = 0;
@@ -80,15 +80,21 @@ async function calcular(a: any, cdi: number, serie: { data: string; taxa: number
 }
 
 export async function computeAportesAtivos(): Promise<AporteAtual[]> {
-  const cdi = await cdiVigente();
-  const serie = await cdiSerie();
-  const selic = await selicVigente();
-  const selicS = await selicSerie();
+  const [cdi, serie, selic, selicS] = await Promise.all([cdiVigente(), cdiSerie(), selicVigente(), selicSerie()]);
   const { data } = await supabaseAdmin.from("aportes")
     .select(`*, empresas!inner(nome, tipo, regime_tributario), investidores!inner(nome_razao_social), instrumentos_financeiros!inner(baseado_em_cotas, isento_ir)`)
     .eq("status", "ativo").order("created_at", { ascending: false });
+  const { data: resg } = await supabaseAdmin.from("resgates")
+    .select("aporte_id, valor_bruto, base_calculo_ir").eq("status", "efetuado");
+  const resgatesMap = new Map<string, { bruto: number; principal: number }>();
+  for (const r of resg ?? []) {
+    const cur = resgatesMap.get(r.aporte_id) ?? { bruto: 0, principal: 0 };
+    const vb = Number(r.valor_bruto);
+    cur.bruto += vb; cur.principal += vb - Number(r.base_calculo_ir);
+    resgatesMap.set(r.aporte_id, cur);
+  }
   const out: AporteAtual[] = [];
-  for (const a of data ?? []) out.push(await calcular(a, cdi, serie, selic, selicS));
+  for (const a of data ?? []) out.push(await calcular(a, cdi, serie, selic, selicS, resgatesMap));
   return out;
 }
 
