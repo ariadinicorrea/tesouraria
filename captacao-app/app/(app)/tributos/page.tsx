@@ -2,9 +2,11 @@ import { computeTributos } from "@/lib/tributos";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { PrintButton } from "@/components/print-button";
 import { fmtBRL, fmtPct, fmtData } from "@/lib/format";
+import { unstable_noStore as noStore } from "next/cache";
 export const dynamic = "force-dynamic";
 
 export default async function TributosPage({ searchParams }: { searchParams: { de?: string; ate?: string; investidor?: string } }) {
+  noStore();
   const anoAnt = new Date().getFullYear() - 1;
   const de = searchParams?.de || `${anoAnt}-01-01`;
   const ate = searchParams?.ate || `${anoAnt}-12-31`;

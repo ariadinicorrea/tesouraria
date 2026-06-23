@@ -4,9 +4,11 @@ import { Card, Stat } from "@/components/ui";
 import { NovoAporte } from "@/components/novo-aporte";
 import { Tabela, type Coluna } from "@/components/tabela";
 import { fmtBRL } from "@/lib/format";
+import { unstable_noStore as noStore } from "next/cache";
 export const dynamic = "force-dynamic";
 
 export default async function AportesPage({ searchParams }: { searchParams: { investidor?: string; empresa?: string } }) {
+  noStore();
   const invFiltro = searchParams?.investidor || "";
   const empFiltro = searchParams?.empresa || "";
 

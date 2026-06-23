@@ -3,8 +3,10 @@ import { Card, Stat } from "@/components/ui";
 import { fmtBRL, fmtPct, fmtData } from "@/lib/format";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { unstable_noStore as noStore } from "next/cache";
 export const dynamic = "force-dynamic";
 export default async function Page({ params }: { params: { id: string } }) {
+  noStore();
   const cc = await computeContaCorrente(params.id);
   if (!cc) notFound();
   return (

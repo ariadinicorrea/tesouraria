@@ -2,9 +2,11 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { Card } from "@/components/ui";
 import { NovoInvestidor } from "@/components/novo-investidor";
 import { Tabela, type Coluna } from "@/components/tabela";
+import { unstable_noStore as noStore } from "next/cache";
 export const dynamic = "force-dynamic";
 
 export default async function InvestidoresPage({ searchParams }: { searchParams: { q?: string } }) {
+  noStore();
   const q = (searchParams?.q || "").replace(/[(),]/g, " ").trim();
   let query = supabaseAdmin.from("investidores").select("*").order("nome_razao_social");
   if (q) query = query.or(`nome_razao_social.ilike.%${q}%,documento.ilike.%${q}%`);

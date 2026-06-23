@@ -4,12 +4,14 @@ import { fmtBRL, fmtPct, fmtData } from "@/lib/format";
 import { notFound } from "next/navigation";
 import { getLogo } from "@/lib/config";
 import Link from "next/link";
+import { unstable_noStore as noStore } from "next/cache";
 
 export const dynamic = "force-dynamic";
 const BCB = "https://www3.bcb.gov.br/CALCIDADAO/publico/exibirFormCorrecaoValores.do?method=exibirFormCorrecaoValores";
 
 
 export default async function Relatorio({ params }: { params: { id: string } }) {
+  noStore();
   const pos = await computeInvestidorPosicao(params.id);
   if (!pos) notFound();
   const { investidor, posicoes, totais, cdiAtual, taxaMediaPonderadaAnual } = pos;

@@ -5,9 +5,11 @@ import { PrintButton } from "@/components/print-button";
 import { fmtBRL, fmtPct, fmtData } from "@/lib/format";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { unstable_noStore as noStore } from "next/cache";
 export const dynamic = "force-dynamic";
 
 export default async function Informe({ params, searchParams }: { params: { id: string }; searchParams: { ano?: string } }) {
+  noStore();
   const anoAtual = new Date().getFullYear();
   const ano = searchParams?.ano ? Number(searchParams.ano) : anoAtual - 1;
   const pos = await computeInvestidorPosicao(params.id);

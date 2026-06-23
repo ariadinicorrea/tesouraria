@@ -3,9 +3,11 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { NovoResgate } from "@/components/novo-resgate";
 import { Card } from "@/components/ui";
 import { Tabela, type Coluna } from "@/components/tabela";
+import { unstable_noStore as noStore } from "next/cache";
 export const dynamic = "force-dynamic";
 
 export default async function ResgatesPage({ searchParams }: { searchParams: { investidor?: string; empresa?: string } }) {
+  noStore();
   const invFiltro = searchParams?.investidor || "";
   const empFiltro = searchParams?.empresa || "";
   const [aportes, investidoresRes, empresasRes] = await Promise.all([

@@ -1,8 +1,10 @@
 import { computeCautelas } from "@/lib/cautelas";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { CautelasAdmin } from "@/components/cautelas-admin";
+import { unstable_noStore as noStore } from "next/cache";
 export const dynamic = "force-dynamic";
 export default async function CautelasPage() {
+  noStore();
   const [cautelas, empresasRes] = await Promise.all([
     computeCautelas(),
     supabaseAdmin.from("empresas").select("id, nome").eq("ativo", true).order("nome"),

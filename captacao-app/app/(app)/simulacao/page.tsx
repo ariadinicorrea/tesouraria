@@ -1,10 +1,12 @@
 import { computeAportesAtivos } from "@/lib/aporte";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { Simulador } from "@/components/simulador";
+import { unstable_noStore as noStore } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
 export default async function SimulacaoPage() {
+  noStore();
   const aportes = await computeAportesAtivos();
   const posicoes = aportes.map((a) => ({ saldoBruto: a.saldoBruto, taxaEfetivaAnual: a.taxaEf }));
   const { data: cdiRow } = await supabaseAdmin.from("cdi_historico").select("taxa_anual").order("data_referencia", { ascending: false }).limit(1).maybeSingle();

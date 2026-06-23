@@ -1,8 +1,10 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getLogo } from "@/lib/config";
 import { PropostaInvestimento } from "@/components/proposta-investimento";
+import { unstable_noStore as noStore } from "next/cache";
 export const dynamic = "force-dynamic";
 export default async function PropostaPage() {
+  noStore();
   const [{ data: cdi }, logo] = await Promise.all([
     supabaseAdmin.from("cdi_historico").select("taxa_anual").order("data_referencia", { ascending: false }).limit(1).maybeSingle(),
     getLogo(),

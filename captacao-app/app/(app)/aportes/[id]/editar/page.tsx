@@ -1,9 +1,11 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { EditarAporte } from "@/components/editar-aporte";
 import Link from "next/link";
+import { unstable_noStore as noStore } from "next/cache";
 export const dynamic = "force-dynamic";
 
 export default async function EditarAportePage({ params }: { params: { id: string } }) {
+  noStore();
   const [aRes, empresasRes, investidoresRes, instrumentosRes, agentesRes, cautelasRes] = await Promise.all([
     supabaseAdmin.from("aportes").select("*").eq("id", params.id).maybeSingle(),
     supabaseAdmin.from("empresas").select("id, nome").eq("ativo", true).order("nome"),

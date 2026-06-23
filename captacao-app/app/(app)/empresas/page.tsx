@@ -1,7 +1,9 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { EmpresasAdmin } from "@/components/empresas-admin";
+import { unstable_noStore as noStore } from "next/cache";
 export const dynamic = "force-dynamic";
 export default async function EmpresasPage() {
+  noStore();
   const { data: empresas } = await supabaseAdmin.from("empresas").select("*").order("nome");
   return (
     <div className="p-8">

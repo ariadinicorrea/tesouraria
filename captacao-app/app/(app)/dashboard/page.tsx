@@ -4,10 +4,12 @@ import { computeCautelas } from "@/lib/cautelas";
 import { Card, Stat } from "@/components/ui";
 import { EscopoSelector } from "@/components/escopo-selector";
 import { fmtBRL, fmtPct, fmtNum, fmtData } from "@/lib/format";
+import { unstable_noStore as noStore } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage({ searchParams }: { searchParams: { escopo?: string } }) {
+  noStore();
   const escopo = searchParams?.escopo ?? "consolidado";
   const { data: empresas } = await supabaseAdmin.from("empresas").select("id, nome").eq("ativo", true).order("nome");
   const { data: solicitados } = await supabaseAdmin.from("resgates")

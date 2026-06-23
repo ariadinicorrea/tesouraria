@@ -1,8 +1,10 @@
 import { getLogo } from "@/lib/config";
 import { ConfigLogo } from "@/components/config-logo";
 import { LimparDados } from "@/components/limpar-dados";
+import { unstable_noStore as noStore } from "next/cache";
 export const dynamic = "force-dynamic";
 export default async function ConfiguracoesPage() {
+  noStore();
   const logo = await getLogo();
   return (
     <div className="p-8">

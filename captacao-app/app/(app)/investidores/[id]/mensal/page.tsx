@@ -5,6 +5,7 @@ import { PrintButton } from "@/components/print-button";
 import { fmtBRL, fmtPct, fmtData } from "@/lib/format";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { unstable_noStore as noStore } from "next/cache";
 export const dynamic = "force-dynamic";
 
 function mesAnterior() {
@@ -16,6 +17,7 @@ function mesAnterior() {
 }
 
 export default async function Mensal({ params, searchParams }: { params: { id: string }; searchParams: { ini?: string; fim?: string; rotulo?: string } }) {
+  noStore();
   const def = mesAnterior();
   const ini = searchParams?.ini ?? def.ini, fim = searchParams?.fim ?? def.fim, rotulo = searchParams?.rotulo ?? def.rotulo;
   const pos = await computeInvestidorPosicao(params.id);

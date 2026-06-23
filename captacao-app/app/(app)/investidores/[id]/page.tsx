@@ -5,9 +5,11 @@ import { InvestidorDetail } from "@/components/investidor-detail";
 import { fmtBRL, fmtPct, fmtData } from "@/lib/format";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { unstable_noStore as noStore } from "next/cache";
 export const dynamic = "force-dynamic";
 
 export default async function Page({ params }: { params: { id: string } }) {
+  noStore();
   const pos = await computeInvestidorPosicao(params.id);
   if (!pos) notFound();
   const { investidor, posicoes, totais, cdiAtual, taxaMediaPonderadaAnual } = pos;
