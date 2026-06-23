@@ -33,7 +33,7 @@ export function Importador() {
     const r = await fetch("/api/importar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tipo, texto }) });
     const j = await r.json(); setBusy(false);
     if (!j.ok) return setErro(j.erro);
-    setRes(j); router.refresh();
+    setRes(j); window.location.reload();
   }
 
   return (

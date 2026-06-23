@@ -18,7 +18,7 @@ export function LimparDados() {
     const r = await fetch("/api/limpar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ confirmar: "APAGAR", escopo }) });
     const j = await r.json(); setBusy(null);
     if (!j.ok) return setErro(j.erro);
-    setRes(j); setTxt(""); router.refresh();
+    setRes(j); setTxt(""); window.location.reload();
   }
   const nomes: Record<string, string> = { comissoes: "comissões", resgates: "resgates", aportes: "aportes", investidores: "investidores" };
 

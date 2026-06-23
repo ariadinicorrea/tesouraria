@@ -18,7 +18,7 @@ export function EmpresasAdmin({ empresas }: { empresas: Empresa[] }) {
 
   async function recarregar() {
     try { const r = await fetch("/api/empresas", { cache: "no-store" }); const j = await r.json(); if (j.ok) setLista(j.empresas); } catch {}
-    router.refresh();
+    window.location.reload();
   }
   function abrirEdicao(e: Empresa) { setEditId(e.id); setForm({ ...e }); setErro(null); setMsg(null); }
 

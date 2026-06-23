@@ -17,7 +17,7 @@ export function AgentesAdmin({ agentes }: { agentes: Agente[] }) {
 
   async function recarregar() {
     try { const r = await fetch("/api/agentes", { cache: "no-store" }); const j = await r.json(); if (j.ok) setLista(j.agentes); } catch {}
-    router.refresh();
+    window.location.reload();
   }
   function abrirEdicao(a: Agente) { setEditId(a.id); setForm({ ...a, comissao_padrao: a.comissao_padrao != null ? Number((a.comissao_padrao * 100).toFixed(6)) : "" }); setErro(null); setMsg(null); }
   async function salvar(id: string) {

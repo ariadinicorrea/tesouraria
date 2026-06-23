@@ -20,7 +20,7 @@ export function UsuariosAdmin({ usuarios }: { usuarios: any[] }) {
 
   async function recarregar() {
     try { const r = await fetch("/api/usuarios", { cache: "no-store" }); const j = await r.json(); if (j.ok) setLista(j.usuarios); } catch {}
-    router.refresh();
+    window.location.reload();
   }
   async function criar() {
     setBusy(true); setErro(null); setMsg(null);

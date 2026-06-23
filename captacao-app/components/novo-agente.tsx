@@ -13,7 +13,7 @@ export function NovoAgente() {
     const res = await fetch("/api/agentes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(f) });
     const j = await res.json();
     if (!j.ok) return setErro(j.erro);
-    setAberto(false); setF({ nome: "", documento: "", email: "", telefone: "", comissao_padrao: "" }); router.refresh();
+    setAberto(false); setF({ nome: "", documento: "", email: "", telefone: "", comissao_padrao: "" }); window.location.reload();
   }
   if (!aberto) return <button onClick={() => setAberto(true)} className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-white">Novo agente</button>;
   return (

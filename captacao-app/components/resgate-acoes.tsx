@@ -16,7 +16,7 @@ export function ResgateAcoes({ resgateId, status, email, telefone, mensagem }: {
     setEfetuando(true);
     const res = await fetch(`/api/resgates/${resgateId}`, { method: "PATCH" });
     const j = await res.json(); setEfetuando(false);
-    if (j.ok) router.refresh();
+    if (j.ok) window.location.reload();
   }
   return (
     <div className="mb-4 flex flex-wrap gap-2 no-print">

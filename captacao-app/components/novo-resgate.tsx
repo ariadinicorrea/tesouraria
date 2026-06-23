@@ -25,7 +25,7 @@ export function NovoResgate({ aportes }: { aportes: Aporte[] }) {
     const j = await res.json(); setSalvando(false);
     if (!j.ok) return setErro(j.erro);
     setOk(`Resgate registrado. Bruto ${brl(j.valorBruto)} · IR ${brl(j.irRetido)} (${(j.aliquota * 100).toFixed(1)}%) · Líquido ${brl(j.valorLiquido)}`);
-    setSel(""); setPrincipal(""); setJuros(""); router.refresh();
+    setSel(""); setPrincipal(""); setJuros(""); window.location.reload();
   }
 
   return (

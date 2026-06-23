@@ -22,12 +22,12 @@ export function ConfigLogo({ logoAtual }: { logoAtual: string | null }) {
     const res = await fetch("/api/configuracoes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ logo_data_url: preview }) });
     const j = await res.json(); setSalvando(false);
     if (!j.ok) return setErro(j.erro);
-    setMsg("Logo salvo! Já aparece nos relatórios."); router.refresh();
+    setMsg("Logo salvo! Já aparece nos relatórios."); window.location.reload();
   }
   async function remover() {
     setPreview(null);
     await fetch("/api/configuracoes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ logo_data_url: null }) });
-    setMsg("Logo removido."); router.refresh();
+    setMsg("Logo removido."); window.location.reload();
   }
   return (
     <div className="rounded-lg border bg-surface p-5">

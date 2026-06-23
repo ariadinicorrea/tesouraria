@@ -15,7 +15,7 @@ export function NovoInvestidor() {
     const res = await fetch("/api/investidores", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
     const json = await res.json(); setSalvando(false);
     if (!json.ok) return setErro(json.erro);
-    setAberto(false); setForm(vazio); router.refresh();
+    setAberto(false); setForm(vazio); window.location.reload();
   }
   if (!aberto) return <button onClick={() => setAberto(true)} className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-white hover:opacity-90">Novo investidor</button>;
   return (

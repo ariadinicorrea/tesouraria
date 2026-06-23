@@ -17,7 +17,7 @@ export function CautelasAdmin({ cautelas, empresas }: { cautelas: any[]; empresa
 
   async function recarregar() {
     try { const r = await fetch("/api/cautelas", { cache: "no-store" }); const j = await r.json(); if (j.ok) setLista(j.cautelas); } catch {}
-    router.refresh();
+    window.location.reload();
   }
   async function criar() {
     setErro(null); setMsg(null);

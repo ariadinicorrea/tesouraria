@@ -26,7 +26,7 @@ export function NovoAporte({ empresas, investidores, instrumentos, agentes, caut
     const res = await fetch("/api/aportes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(f) });
     const json = await res.json(); setSalvando(false);
     if (!json.ok) return setErro(json.erro);
-    setOk(true); router.refresh();
+    setOk(true); window.location.reload();
   }
   return (
     <div className="rounded-lg border bg-surface p-5">

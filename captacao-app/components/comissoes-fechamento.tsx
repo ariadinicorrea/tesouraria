@@ -23,7 +23,7 @@ export function ComissoesFechamento({ comissoes, agentes }: { comissoes: any[]; 
     if (fDe) p.set("de", fDe + "-01");
     if (fAte) p.set("ate", fAte + "-31");
     try { const r = await fetch(`/api/comissoes?${p}`, { cache: "no-store" }); const j = await r.json(); if (j.ok) setLista(j.comissoes); } catch {}
-    router.refresh();
+    window.location.reload();
   }
   async function gerar() {
     setBusy(true); setErro(null); setMsg(null);

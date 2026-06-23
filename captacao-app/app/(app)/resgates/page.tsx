@@ -4,8 +4,6 @@ import { NovoResgate } from "@/components/novo-resgate";
 import { Card } from "@/components/ui";
 import { Tabela, type Coluna } from "@/components/tabela";
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export const fetchCache = "force-no-store";
 
 export default async function ResgatesPage({ searchParams }: { searchParams: { investidor?: string; empresa?: string } }) {
   const invFiltro = searchParams?.investidor || "";

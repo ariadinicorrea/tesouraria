@@ -40,7 +40,7 @@ export function EditarAporte({ aporte, empresas, investidores, instrumentos, age
       let j: any = null; try { j = await res.json(); } catch {}
       setSalvando(false);
       if (!res.ok || !j || !j.ok) return setErro((j && j.erro) || `Falha (HTTP ${res.status}).`);
-      setOk(true); router.refresh();
+      setOk(true); window.location.reload();
     } catch (e: any) { setSalvando(false); setErro("Erro de conexão: " + (e?.message || "")); }
   }
 
