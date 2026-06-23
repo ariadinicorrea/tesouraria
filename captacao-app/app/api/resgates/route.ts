@@ -39,5 +39,17 @@ export async function POST(req: Request) {
   });
   if (error) return NextResponse.json({ ok: false, erro: error.message }, { status: 400 });
   if (tipo === "total" && status === "efetuado") await supabaseAdmin.from("aportes").update({ status: "resgatado_total" }).eq("id", b.aporte_id);
+
+  // devolve cautelas ao estoque (securitizadora)
+  if (status === "efetuado") {
+    if (tipo === "total") {
+      await supabaseAdmin.from("cautelas").update({ status: "disponivel", aporte_id: null }).eq("aporte_id", b.aporte_id);
+    } else {
+      const devolver = Array.isArray(b.cautela_ids) ? b.cautela_ids : [];
+      if (devolver.length > 0) {
+        await supabaseAdmin.from("cautelas").update({ status: "disponivel", aporte_id: null }).in("id", devolver).eq("aporte_id", b.aporte_id);
+      }
+    }
+  }
   return NextResponse.json({ ok: true, valorBruto, iofRetido: iof, irRetido: trib.irRetido, aliquota: trib.aliquota, valorLiquido, status });
 }

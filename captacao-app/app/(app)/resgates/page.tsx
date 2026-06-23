@@ -15,6 +15,9 @@ export default async function ResgatesPage({ searchParams }: { searchParams: { i
     supabaseAdmin.from("investidores").select("id, nome_razao_social").order("nome_razao_social"),
     supabaseAdmin.from("empresas").select("id, nome").eq("ativo", true).order("nome"),
   ]);
+  const { data: cautelasVendidas } = await supabaseAdmin.from("cautelas").select("id, aporte_id, codigo, serie, valor").eq("status", "vendida");
+  const cautelasPorAporte: Record<string, any[]> = {};
+  for (const c of (cautelasVendidas ?? [])) { if (!c.aporte_id) continue; (cautelasPorAporte[c.aporte_id] ||= []).push(c); }
   let q = supabaseAdmin.from("resgates")
     .select("*, aportes!inner(investidor_id, empresa_id, investidores(nome_razao_social), empresas(nome))")
     .order("data_resgate", { ascending: false });
@@ -43,7 +46,7 @@ export default async function ResgatesPage({ searchParams }: { searchParams: { i
   return (
     <div className="p-8">
       <header><div className="eyebrow">Operações</div><h1 className="mt-1 text-xl font-semibold tracking-tight">Resgates</h1></header>
-      <div className="mt-6"><NovoResgate aportes={aportes} /></div>
+      <div className="mt-6"><NovoResgate cautelasPorAporte={cautelasPorAporte} aportes={aportes} /></div>
       <Card className="mt-6">
         <div className="flex flex-wrap items-end justify-between gap-3 border-b px-5 py-3">
           <div className="eyebrow">Histórico de resgates</div>
