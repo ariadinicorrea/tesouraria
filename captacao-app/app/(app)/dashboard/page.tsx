@@ -6,6 +6,8 @@ import { EscopoSelector } from "@/components/escopo-selector";
 import { fmtBRL, fmtPct, fmtNum, fmtData } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 export default async function DashboardPage({ searchParams }: { searchParams: { escopo?: string } }) {
   const escopo = searchParams?.escopo ?? "consolidado";

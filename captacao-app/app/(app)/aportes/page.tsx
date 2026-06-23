@@ -5,6 +5,8 @@ import { NovoAporte } from "@/components/novo-aporte";
 import { Tabela, type Coluna } from "@/components/tabela";
 import { fmtBRL } from "@/lib/format";
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 export default async function AportesPage({ searchParams }: { searchParams: { investidor?: string; empresa?: string } }) {
   const invFiltro = searchParams?.investidor || "";

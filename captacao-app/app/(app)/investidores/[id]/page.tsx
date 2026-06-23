@@ -6,6 +6,8 @@ import { fmtBRL, fmtPct, fmtData } from "@/lib/format";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 export default async function Page({ params }: { params: { id: string } }) {
   const pos = await computeInvestidorPosicao(params.id);
