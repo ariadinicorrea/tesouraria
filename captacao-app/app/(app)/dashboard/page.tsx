@@ -4,6 +4,7 @@ import { computeCautelas } from "@/lib/cautelas";
 import { Card, Stat } from "@/components/ui";
 import { EscopoSelector } from "@/components/escopo-selector";
 import { fmtBRL, fmtPct, fmtNum, fmtData } from "@/lib/format";
+import { anualParaMensal } from "@/lib/funding-engine";
 import { unstable_noStore as noStore } from "next/cache";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,8 @@ export const dynamic = "force-dynamic";
 export default async function DashboardPage({ searchParams }: { searchParams: { escopo?: string } }) {
   noStore();
   const escopo = searchParams?.escopo ?? "consolidado";
+  const { data: cdiUlt } = await supabaseAdmin.from("cdi_historico").select("data_referencia").order("data_referencia", { ascending: false }).limit(1).maybeSingle();
+  const { data: selicUlt } = await supabaseAdmin.from("selic_historico").select("data_referencia").order("data_referencia", { ascending: false }).limit(1).maybeSingle();
   const { data: empresas } = await supabaseAdmin.from("empresas").select("id, nome").eq("ativo", true).order("nome");
   const { data: solicitados } = await supabaseAdmin.from("resgates")
     .select("id, valor_bruto, data_resgate, aportes(investidores(nome_razao_social))")
@@ -53,6 +56,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
         <span className="eyebrow">CDI usado nos cálculos</span>
         <span className="num font-semibold text-ink">{fmtPct(d.cdiAtual)} a.a.</span>
         <span className="text-xs text-muted">(referência {fmtData(d.cdiData)} — Banco Central)</span>
+      </div>
+
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-md border bg-surface px-4 py-2 text-xs text-muted">
+        <span className="eyebrow">Índices carregados</span>
+        <span>CDI até <b className="text-ink">{cdiUlt?.data_referencia ? fmtData(cdiUlt.data_referencia) : "—"}</b></span>
+        <span>Selic até <b className="text-ink">{selicUlt?.data_referencia ? fmtData(selicUlt.data_referencia) : "—"}</b></span>
+        <span className="text-muted/70">(atualização automática diária)</span>
       </div>
 
       {(solicitados && solicitados.length > 0) && (
@@ -132,6 +142,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
             <th className="px-5 py-2 font-medium">Tipo</th>
             <th className="px-5 py-2 text-right font-medium">Saldo</th>
             <th className="px-5 py-2 text-right font-medium">Custo médio (a.a.)</th>
+            <th className="px-5 py-2 text-right font-medium">Custo médio (mês)</th>
             <th className="px-5 py-2 text-right font-medium">Custo mensal</th>
             <th className="px-5 py-2 text-right font-medium">Custo anual</th>
           </tr></thead>
@@ -142,6 +153,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                 <td className="px-5 py-3 text-muted">{e.tipo}</td>
                 <td className="num px-5 py-3 text-right">{fmtBRL(e.saldoBruto)}</td>
                 <td className="num px-5 py-3 text-right text-accent">{fmtPct(e.taxaMediaAnual)}</td>
+                <td className="num px-5 py-3 text-right text-accent">{fmtPct(anualParaMensal(e.taxaMediaAnual), 3)}</td>
                 <td className="num px-5 py-3 text-right text-warn">{fmtBRL(e.custoMensal)}</td>
                 <td className="num px-5 py-3 text-right text-warn">{fmtBRL(e.custoAnual)}</td>
               </tr>
