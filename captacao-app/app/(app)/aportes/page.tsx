@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { computeAportesAtivos } from "@/lib/aporte";
+import { listarCotasComValor } from "@/lib/cotas-fundos";
 import { Card, Stat } from "@/components/ui";
 import { NovoAporte } from "@/components/novo-aporte";
 import { Tabela, type Coluna } from "@/components/tabela";
@@ -25,6 +26,7 @@ export default async function AportesPage({ searchParams }: { searchParams: { in
     supabaseAdmin.from("agentes").select("id, nome, comissao_padrao").eq("ativo", true).order("nome"),
     supabaseAdmin.from("cautelas").select("id, empresa_id, serie, codigo, valor").eq("status", "disponivel").order("codigo"),
   ]);
+  const cotas = await listarCotasComValor();
 
   const ativos = temFiltro ? await computeAportesAtivos() : [];
 
@@ -64,7 +66,7 @@ export default async function AportesPage({ searchParams }: { searchParams: { in
   return (
     <div className="p-8">
       <header><div className="eyebrow">Operações</div><h1 className="mt-1 text-xl font-semibold tracking-tight">Aportes</h1></header>
-      <div className="mt-6"><NovoAporte empresas={empresasRes.data ?? []} investidores={investidoresRes.data ?? []} instrumentos={instrumentosRes.data ?? []} agentes={(agentesRes.data ?? []) as any} cautelas={(cautelasRes.data ?? []) as any} /></div>
+      <div className="mt-6"><NovoAporte empresas={empresasRes.data ?? []} investidores={investidoresRes.data ?? []} instrumentos={instrumentosRes.data ?? []} agentes={(agentesRes.data ?? []) as any} cautelas={(cautelasRes.data ?? []) as any} cotas={cotas as any} /></div>
 
       <Card className="mt-6">
         <div className="border-b px-5 py-3">

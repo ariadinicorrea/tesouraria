@@ -8,13 +8,23 @@ export async function GET() {
 }
 export async function POST(req: Request) {
   const b = await req.json();
+  let cotaSel: any = null;
+  if (b.cota_id) {
+    const { data: cota } = await supabaseAdmin.from("cotas").select("*").eq("id", b.cota_id).maybeSingle();
+    cotaSel = cota;
+  }
   const insert: Record<string, unknown> = {
     empresa_id: b.empresa_id, investidor_id: b.investidor_id, instrumento_id: b.instrumento_id, codigo: b.codigo || null,
     data_aporte: b.data_aporte, valor_aporte: Number(b.valor_aporte), tipo_remuneracao: b.tipo_remuneracao,
-    data_vencimento: b.data_vencimento || null, agente_id: b.agente_id || null, cautela_id: b.cautela_id || null,
+    data_vencimento: b.data_vencimento || null, agente_id: b.agente_id || null, cautela_id: b.cautela_id || null, cota_id: b.cota_id || null,
     comissao_percentual: b.comissao_percentual ? (Number(String(b.comissao_percentual).replace(",", ".")) / 100) : null,
   };
-  if (b.tipo_remuneracao === "percentual_cdi") insert.percentual_cdi = Number(b.percentual_cdi);
+  if (cotaSel) {
+    insert.tipo_remuneracao = cotaSel.tipo_remuneracao;
+    insert.percentual_cdi = cotaSel.percentual_cdi;
+    insert.taxa_valor = cotaSel.taxa_valor;
+    insert.periodo_taxa = cotaSel.periodo_taxa;
+  } else if (b.tipo_remuneracao === "percentual_cdi") insert.percentual_cdi = Number(b.percentual_cdi);
   else { insert.taxa_valor = Number(b.taxa_valor); insert.periodo_taxa = b.periodo_taxa; }
   if (b.quantidade_cotas) insert.quantidade_cotas = Number(b.quantidade_cotas);
   if (b.valor_cota_aporte) insert.valor_cota_aporte = Number(b.valor_cota_aporte);
