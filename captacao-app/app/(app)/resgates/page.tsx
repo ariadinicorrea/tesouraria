@@ -1,6 +1,9 @@
 import { computeAportesAtivos } from "@/lib/aporte";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { NovoResgate } from "@/components/novo-resgate";
+import { ResgateFundo } from "@/components/resgate-fundo";
+import { ResgateTabs } from "@/components/resgate-tabs";
+import { posicaoCotasTodos } from "@/lib/cotas-fundos";
 import { Card } from "@/components/ui";
 import { Tabela, type Coluna } from "@/components/tabela";
 import { unstable_noStore as noStore } from "next/cache";
@@ -24,6 +27,7 @@ export default async function ResgatesPage({ searchParams }: { searchParams: { i
   if (invFiltro) q = q.eq("aportes.investidor_id", invFiltro);
   if (empFiltro) q = q.eq("aportes.empresa_id", empFiltro);
   const { data: historico } = await q;
+  const posCotas = await posicaoCotasTodos();
 
   const linhas = (historico ?? []).map((r: any) => ({
     id: r.id, data_resgate: r.data_resgate,
@@ -46,7 +50,7 @@ export default async function ResgatesPage({ searchParams }: { searchParams: { i
   return (
     <div className="p-8">
       <header><div className="eyebrow">Operações</div><h1 className="mt-1 text-xl font-semibold tracking-tight">Resgates</h1></header>
-      <div className="mt-6"><NovoResgate cautelasPorAporte={cautelasPorAporte} aportes={aportes} /></div>
+      <div className="mt-6"><ResgateTabs geral={<NovoResgate cautelasPorAporte={cautelasPorAporte} aportes={aportes} />} fundo={<ResgateFundo posicoes={posCotas} />} /></div>
       <Card className="mt-6">
         <div className="flex flex-wrap items-end justify-between gap-3 border-b px-5 py-3">
           <div className="eyebrow">Histórico de resgates</div>

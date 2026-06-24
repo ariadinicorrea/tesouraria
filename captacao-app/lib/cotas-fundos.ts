@@ -100,3 +100,28 @@ export async function posicaoCotasInvestidor(investidorId: string): Promise<Posi
     };
   });
 }
+
+// Posição em cotas de TODOS os investidores (pra tela de resgate de fundo)
+export async function posicaoCotasTodos() {
+  const { data: aportes } = await supabaseAdmin.from("aportes")
+    .select("id, valor_aporte, quantidade_cotas, valor_cota_aporte, cota_id, status, investidores!inner(nome_razao_social), empresas!inner(nome, tipo), cotas(serie)")
+    .not("cota_id", "is", null).eq("status", "ativo");
+  const fundos = (aportes ?? []).filter((a: any) => {
+    const emp = Array.isArray(a.empresas) ? a.empresas[0] : a.empresas;
+    return emp?.tipo === "fidc";
+  });
+  if (fundos.length === 0) return [];
+  const cotaIds = Array.from(new Set(fundos.map((a: any) => a.cota_id)));
+  const { data: cotasRows } = await supabaseAdmin.from("cotas").select("*").in("id", cotaIds);
+  const [cdi, serie, selic, selicS] = await Promise.all([cdiVigente(), cdiSerie(), selicVigente(), selicSerie()]);
+  const valorPorCota = new Map<string, number>();
+  for (const c of (cotasRows ?? []) as CotaRow[]) valorPorCota.set(c.id, valorCotaHoje(c, cdi, serie, selic, selicS).valorAtual);
+  return fundos.map((a: any) => {
+    const emp = Array.isArray(a.empresas) ? a.empresas[0] : a.empresas;
+    const inv = Array.isArray(a.investidores) ? a.investidores[0] : a.investidores;
+    const cota = Array.isArray(a.cotas) ? a.cotas[0] : a.cotas;
+    const qtd = Number(a.quantidade_cotas ?? 0);
+    const vCotaHoje = valorPorCota.get(a.cota_id) ?? Number(a.valor_cota_aporte ?? 0);
+    return { aporteId: a.id, investidor: inv?.nome_razao_social ?? "—", empresa: emp?.nome ?? "—", cotaSerie: cota?.serie ?? "—", quantidadeCotas: qtd, valorCotaHoje: vCotaHoje, valorAtual: qtd * vCotaHoje };
+  });
+}
