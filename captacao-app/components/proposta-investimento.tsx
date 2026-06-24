@@ -38,7 +38,10 @@ export function PropostaInvestimento({ cdiAtual, logo }: { cdiAtual: number; log
     const poupMensal = cdiAtual > 0.085 ? 0.005 : 0.70 * (Math.pow(1 + cdiAtual, 1 / 12) - 1);
     const poupFinal = P * Math.pow(1 + poupMensal, meses);
     const vantagem = liquido - poupFinal;
-    return { meses, bruto, rend, ir: trib.irRetido, aliq: trib.aliquota, iof, liquido, poupFinal, vantagem };
+    const anos = meses / 12;
+    const txBrutaAA = anos > 0 && P > 0 ? Math.pow(bruto / P, 1 / anos) - 1 : 0;
+    const txLiqAA = anos > 0 && P > 0 ? Math.pow(liquido / P, 1 / anos) - 1 : 0;
+    return { meses, bruto, rend, ir: trib.irRetido, aliq: trib.aliquota, iof, liquido, poupFinal, vantagem, txBrutaAA, txLiqAA };
   };
   const rotuloMes = (m: number) => m === 6 ? "Até 6 meses" : m === 12 ? "De 6 meses a 1 ano" : m === 24 ? "De 1 a 2 anos" : m === 36 ? "De 2 anos em diante" : `${m} meses`;
   const modLabel = modalidade === "percentual_cdi" ? `${num(percentualCdi)}% do CDI` : modalidade === "cdi_mais" ? `CDI + ${num(spread)}% a.a.` : `${num(taxaFixa)}% a.a. (fixa)`;
@@ -83,6 +86,7 @@ export function PropostaInvestimento({ cdiAtual, logo }: { cdiAtual: number; log
             <th className="py-2 font-medium">Prazo</th><th className="py-2 text-right font-medium">Valor bruto</th>
             <th className="py-2 text-right font-medium">Rendimento</th><th className="py-2 text-right font-medium">IR (aliq.)</th>
             <th className="py-2 text-right font-medium">Valor líquido</th>
+            <th className="py-2 text-right font-medium">Taxa bruta a.a.</th><th className="py-2 text-right font-medium">Taxa líq. a.a.</th>
           </tr></thead>
           <tbody>
             {horizontes.map((m) => { const l = linha(m); return (
@@ -92,6 +96,8 @@ export function PropostaInvestimento({ cdiAtual, logo }: { cdiAtual: number; log
                 <td className="num py-2 text-right text-accent">{fmtBRL(l.rend)}</td>
                 <td className="num py-2 text-right text-warn">{fmtBRL(l.ir)} <span className="text-muted">({fmtPct(l.aliq, 1)})</span></td>
                 <td className="num py-2 text-right">{fmtBRL(l.liquido)}</td>
+                <td className="num py-2 text-right">{fmtPct(l.txBrutaAA)}</td>
+                <td className="num py-2 text-right text-accent">{fmtPct(l.txLiqAA)}</td>
               </tr>
             ); })}
           </tbody>
