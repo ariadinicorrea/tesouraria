@@ -32,10 +32,34 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
+  const idsParam = searchParams.get("ids");
+  const ids = idsParam ? idsParam.split(",").filter(Boolean) : (id ? [id] : []);
+  if (ids.length === 0) return NextResponse.json({ ok: false, erro: "id ausente" }, { status: 400 });
+  const { data: cs } = await supabaseAdmin.from("cautelas").select("id, status").in("id", ids);
+  const excluiveis = (cs ?? []).filter((c) => c.status !== "vendida").map((c) => c.id);
+  const bloqueadas = (cs ?? []).length - excluiveis.length;
+  if (excluiveis.length === 0) return NextResponse.json({ ok: false, erro: "Nenhuma cautela disponível para excluir (vendidas não podem)." }, { status: 400 });
+  const { error } = await supabaseAdmin.from("cautelas").delete().in("id", excluiveis);
+  if (error) return NextResponse.json({ ok: false, erro: error.message }, { status: 400 });
+  return NextResponse.json({ ok: true, excluidas: excluiveis.length, ignoradas: bloqueadas });
+}
+
+
+export async function PATCH(req: Request) {
+  const b = await req.json();
+  const id = b.id;
   if (!id) return NextResponse.json({ ok: false, erro: "id ausente" }, { status: 400 });
   const { data: c } = await supabaseAdmin.from("cautelas").select("status").eq("id", id).maybeSingle();
-  if (c?.status === "vendida") return NextResponse.json({ ok: false, erro: "Cautela vendida não pode ser excluída." }, { status: 400 });
-  const { error } = await supabaseAdmin.from("cautelas").delete().eq("id", id);
+  if (!c) return NextResponse.json({ ok: false, erro: "Cautela não encontrada." }, { status: 404 });
+  if (c.status === "vendida") return NextResponse.json({ ok: false, erro: "Cautela vendida não pode ser editada." }, { status: 400 });
+  const upd = {};
+  if (b.serie !== undefined) upd.serie = String(b.serie).trim();
+  if (b.valor !== undefined) {
+    const v = Number(String(b.valor).replace(",", ".")) || 0;
+    if (v <= 0) return NextResponse.json({ ok: false, erro: "Valor deve ser maior que zero." }, { status: 400 });
+    upd.valor = v;
+  }
+  const { error } = await supabaseAdmin.from("cautelas").update(upd).eq("id", id);
   if (error) return NextResponse.json({ ok: false, erro: error.message }, { status: 400 });
   return NextResponse.json({ ok: true });
 }
