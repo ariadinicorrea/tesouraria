@@ -58,3 +58,45 @@ export async function listarCotasComValor(empresaId?: string): Promise<CotaComVa
   const [cdi, serie, selic, selicS] = await Promise.all([cdiVigente(), cdiSerie(), selicVigente(), selicSerie()]);
   return cotas.map((c) => ({ ...c, ...valorCotaHoje(c, cdi, serie, selic, selicS) }));
 }
+
+// Posição em cotas de um investidor
+export type PosicaoCota = {
+  aporteId: string; empresa: string; cotaSerie: string;
+  quantidadeCotas: number; valorCotaAporte: number; valorCotaHoje: number;
+  valorInvestido: number; valorAtual: number; rendimento: number;
+};
+
+export async function posicaoCotasInvestidor(investidorId: string): Promise<PosicaoCota[]> {
+  const { data: aportes } = await supabaseAdmin.from("aportes")
+    .select("id, valor_aporte, quantidade_cotas, valor_cota_aporte, cota_id, status, empresas!inner(nome, tipo), cotas(serie)")
+    .eq("investidor_id", investidorId)
+    .not("cota_id", "is", null);
+
+  const fundos = (aportes ?? []).filter((a: any) => {
+    const emp = Array.isArray(a.empresas) ? a.empresas[0] : a.empresas;
+    return emp?.tipo === "fidc" && a.status === "ativo";
+  });
+  if (fundos.length === 0) return [];
+
+  const cotaIds = Array.from(new Set(fundos.map((a: any) => a.cota_id)));
+  const { data: cotasRows } = await supabaseAdmin.from("cotas").select("*").in("id", cotaIds);
+  const [cdi, serie, selic, selicS] = await Promise.all([cdiVigente(), cdiSerie(), selicVigente(), selicSerie()]);
+  const valorPorCota = new Map<string, number>();
+  for (const c of (cotasRows ?? []) as CotaRow[]) {
+    valorPorCota.set(c.id, valorCotaHoje(c, cdi, serie, selic, selicS).valorAtual);
+  }
+
+  return fundos.map((a: any) => {
+    const emp = Array.isArray(a.empresas) ? a.empresas[0] : a.empresas;
+    const cota = Array.isArray(a.cotas) ? a.cotas[0] : a.cotas;
+    const qtd = Number(a.quantidade_cotas ?? 0);
+    const vCotaHoje = valorPorCota.get(a.cota_id) ?? Number(a.valor_cota_aporte ?? 0);
+    const valorAtual = qtd * vCotaHoje;
+    const valorInvestido = Number(a.valor_aporte ?? 0);
+    return {
+      aporteId: a.id, empresa: emp?.nome ?? "—", cotaSerie: cota?.serie ?? "—",
+      quantidadeCotas: qtd, valorCotaAporte: Number(a.valor_cota_aporte ?? 0), valorCotaHoje: vCotaHoje,
+      valorInvestido, valorAtual, rendimento: valorAtual - valorInvestido,
+    };
+  });
+}

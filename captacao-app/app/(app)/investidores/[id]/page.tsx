@@ -1,4 +1,5 @@
 import { computeInvestidorPosicao } from "@/lib/investidor";
+import { posicaoCotasInvestidor } from "@/lib/cotas-fundos";
 import { anualParaMensal } from "@/lib/funding-engine";
 import { Card, Stat } from "@/components/ui";
 import { InvestidorDetail } from "@/components/investidor-detail";
@@ -12,6 +13,7 @@ export default async function Page({ params }: { params: { id: string } }) {
   noStore();
   const pos = await computeInvestidorPosicao(params.id);
   if (!pos) notFound();
+  const cotasPos = await posicaoCotasInvestidor(params.id);
   const { investidor, posicoes, totais, cdiAtual, taxaMediaPonderadaAnual } = pos;
   const taxaMensal = anualParaMensal(taxaMediaPonderadaAnual);
   return (
@@ -72,6 +74,47 @@ export default async function Page({ params }: { params: { id: string } }) {
           </tbody>
         </table>
       </Card>
+      {cotasPos.length > 0 && (
+        <Card className="mt-6">
+          <div className="border-b px-5 py-3 eyebrow">Posição em cotas (fundos)</div>
+          <div className="overflow-x-auto">
+            <table className="tbl">
+              <thead><tr>
+                <th>Fundo</th><th>Cota</th>
+                <th className="text-right">Qtd cotas</th>
+                <th className="text-right">Cota na compra</th>
+                <th className="text-right">Cota hoje</th>
+                <th className="text-right">Investido</th>
+                <th className="text-right">Valor atual</th>
+                <th className="text-right">Rendimento</th>
+              </tr></thead>
+              <tbody>
+                {cotasPos.map((c) => (
+                  <tr key={c.aporteId}>
+                    <td className="font-medium">{c.empresa}</td>
+                    <td className="text-muted">{c.cotaSerie}</td>
+                    <td className="num text-right">{c.quantidadeCotas.toLocaleString("pt-BR", { maximumFractionDigits: 6 })}</td>
+                    <td className="num text-right">{fmtBRL(c.valorCotaAporte)}</td>
+                    <td className="num text-right">{fmtBRL(c.valorCotaHoje)}</td>
+                    <td className="num text-right">{fmtBRL(c.valorInvestido)}</td>
+                    <td className="num text-right font-semibold">{fmtBRL(c.valorAtual)}</td>
+                    <td className="num text-right text-accent">{fmtBRL(c.rendimento)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot className="border-t font-medium">
+                <tr>
+                  <td className="px-4 py-2.5" colSpan={5}>Total em cotas</td>
+                  <td className="num px-4 py-2.5 text-right">{fmtBRL(cotasPos.reduce((s, c) => s + c.valorInvestido, 0))}</td>
+                  <td className="num px-4 py-2.5 text-right">{fmtBRL(cotasPos.reduce((s, c) => s + c.valorAtual, 0))}</td>
+                  <td className="num px-4 py-2.5 text-right text-accent">{fmtBRL(cotasPos.reduce((s, c) => s + c.rendimento, 0))}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </Card>
+      )}
+
       <InvestidorDetail investidor={investidor} />
     </div>
   );
