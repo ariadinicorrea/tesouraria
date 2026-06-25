@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { taxaEfetivaAnual, saldoBrutoAtualizado, calcularTributacao, iofAliquota } from "@/lib/funding-engine";
+import { taxaEfetivaAnual, saldoBrutoAtualizado, calcularTributacao, iofAliquota, contarDiasUteis } from "@/lib/funding-engine";
 import { fmtBRL, fmtPct } from "@/lib/format";
 
 const input = "w-full rounded-md border bg-paper px-3 py-2 text-sm outline-none focus:border-ink";
@@ -27,8 +27,10 @@ export function PropostaInvestimento({ cdiAtual, logo }: { cdiAtual: number; log
   const horizontes = Array.from(new Set([6, 12, 24, 36, prazoMeses])).sort((a, b) => a - b);
 
   const linha = (meses: number) => {
-    const diasUteis = Math.round(meses * 21);
-    const diasCorridos = Math.round(meses * 30);
+    const inicio = new Date();
+    const fim = new Date(); fim.setMonth(fim.getMonth() + meses);
+    const diasUteis = contarDiasUteis(inicio, fim);
+    const diasCorridos = Math.round((fim.getTime() - inicio.getTime()) / 86400000);
     const bruto = saldoBrutoAtualizado(P, taxaEf, diasUteis);
     const rend = bruto - P;
     const iof = regime !== "isento" && diasCorridos < 30 ? rend * iofAliquota(diasCorridos) : 0;
