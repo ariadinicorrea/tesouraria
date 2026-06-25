@@ -273,13 +273,46 @@ export function projetarCusto(
  *  8) CONTAGEM DE DIAS ÚTEIS  (versão simplificada — exclui fins de semana)
  *  Em produção, substituir pelo calendário de feriados ANBIMA.
  * ------------------------------------------------------------------- */
+// ===== Feriados B3/ANBIMA (nacionais) — fixos + móveis calculados =====
+function domingoPascoa(ano) {
+  const a = ano % 19, b = Math.floor(ano / 100), c = ano % 100;
+  const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4), k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const mes = Math.floor((h + l - 7 * m + 114) / 31);
+  const dia = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(ano, mes - 1, dia);
+}
+function addDias(base, n) { const d = new Date(base); d.setDate(d.getDate() + n); return d; }
+const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const _cacheFeriados = {};
+function feriadosDoAno(ano) {
+  if (_cacheFeriados[ano]) return _cacheFeriados[ano];
+  const pascoa = domingoPascoa(ano);
+  const set = new Set([
+    `${ano}-01-01`, `${ano}-04-21`, `${ano}-05-01`, `${ano}-09-07`,
+    `${ano}-10-12`, `${ano}-11-02`, `${ano}-11-15`, `${ano}-12-25`,
+    ymd(addDias(pascoa, -48)), ymd(addDias(pascoa, -47)),
+    ymd(addDias(pascoa, -2)), ymd(addDias(pascoa, 60)),
+  ]);
+  if (ano >= 2024) set.add(`${ano}-11-20`);
+  _cacheFeriados[ano] = set;
+  return set;
+}
+export function ehFeriado(d) {
+  return feriadosDoAno(d.getFullYear()).has(ymd(d));
+}
+
 export function contarDiasUteis(inicio: Date, fim: Date): number {
   let dias = 0;
   const d = new Date(inicio);
   while (d < fim) {
     d.setDate(d.getDate() + 1);
     const wd = d.getDay();
-    if (wd !== 0 && wd !== 6) dias++;
+    if (wd !== 0 && wd !== 6 && !ehFeriado(d)) dias++;
   }
   return dias;
 }
