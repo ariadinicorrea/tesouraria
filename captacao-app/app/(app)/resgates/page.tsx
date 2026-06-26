@@ -45,7 +45,8 @@ export default async function ResgatesPage({ searchParams }: { searchParams: { i
     { chave: "valor_bruto", rotulo: "Bruto", tipo: "moeda", align: "right" },
     { chave: "ir_retido", rotulo: "IR", tipo: "moeda", align: "right" },
     { chave: "valor_liquido", rotulo: "Líquido", tipo: "moeda", align: "right" },
-    { chave: "acoes", rotulo: "", links: [{ rotulo: "Comprovante →", base: "/resgates/", sufixo: "/comprovante" }] },
+    { chave: "comprovante", rotulo: "", links: [{ rotulo: "Comprovante →", base: "/resgates/", sufixo: "/comprovante" }] },
+    { chave: "acoes", rotulo: "", acao: { rotulo: "Excluir", base: "/api/resgates/", metodo: "DELETE", confirmar: "Excluir este resgate? Se estiver efetuado, as cautelas voltam ao estoque e o aporte volta a ficar ativo." } },
   ];
   return (
     <div className="p-8">
