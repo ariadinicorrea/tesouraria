@@ -3,14 +3,12 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { computeAporteAtual } from "@/lib/aporte";
 import { calcularTributacao, iofAliquota } from "@/lib/funding-engine";
 export const dynamic = "force-dynamic";
-
 export async function POST(req: Request) {
   const b = await req.json();
   const pos = await computeAporteAtual(b.aporte_id);
   if (!pos) return NextResponse.json({ ok: false, erro: "Aporte não encontrado" }, { status: 404 });
   const tipo = b.tipo_resgate as "parcial" | "total" | "apenas_juros";
   const status = b.status === "solicitado" ? "solicitado" : "efetuado";
-
   let valorBruto = 0, baseRend = 0;
   if (tipo === "total") { valorBruto = pos.saldoBruto; baseRend = pos.rendimento; }
   else if (tipo === "apenas_juros") { valorBruto = pos.rendimento; baseRend = pos.rendimento; }
@@ -22,7 +20,6 @@ export async function POST(req: Request) {
     if (principal + juros > pos.saldoBruto + 0.01) return NextResponse.json({ ok: false, erro: "Total maior que o saldo disponível" }, { status: 400 });
     valorBruto = principal + juros; baseRend = juros;
   }
-
   // IOF: só para regimes tributados e resgate antes de 30 dias
   const iofAl = pos.regime === "isento" ? 0 : iofAliquota(pos.diasCorridos);
   const iof = baseRend * iofAl;
@@ -30,26 +27,35 @@ export async function POST(req: Request) {
   const trib = calcularTributacao(pos.regime, baseIr, pos.diasCorridos);
   const valorLiquido = valorBruto - iof - trib.irRetido;
 
+  // Descobre quais cautelas serão devolvidas ao estoque (securitizadora) ANTES
+  // de qualquer update que zere o aporte_id, para registrar no resgate.
+  let cautelasDevolvidas: string[] = [];
+  if (status === "efetuado") {
+    if (tipo === "total") {
+      const { data: linkadas } = await supabaseAdmin.from("cautelas").select("id").eq("aporte_id", b.aporte_id);
+      cautelasDevolvidas = (linkadas ?? []).map((c: any) => String(c.id));
+    } else {
+      const pedidas = Array.isArray(b.cautela_ids) ? b.cautela_ids : [];
+      if (pedidas.length > 0) {
+        const { data: linkadas } = await supabaseAdmin.from("cautelas").select("id").in("id", pedidas).eq("aporte_id", b.aporte_id);
+        cautelasDevolvidas = (linkadas ?? []).map((c: any) => String(c.id));
+      }
+    }
+  }
+
   const { error } = await supabaseAdmin.from("resgates").insert({
     aporte_id: b.aporte_id, data_resgate: b.data_resgate || new Date().toISOString().slice(0, 10),
     tipo_resgate: tipo, valor_solicitado: tipo === "parcial" ? valorBruto : null,
     valor_bruto: valorBruto, base_calculo_ir: baseIr, aliquota_ir: trib.aliquota, ir_retido: trib.irRetido,
     base_iof: baseRend, iof_retido: iof, valor_liquido: valorLiquido, prazo_dias: pos.diasCorridos,
     status, efetuado_em: status === "efetuado" ? new Date().toISOString() : null,
+    cautelas_devolvidas: cautelasDevolvidas.length > 0 ? cautelasDevolvidas : null,
   });
   if (error) return NextResponse.json({ ok: false, erro: error.message }, { status: 400 });
   if (tipo === "total" && status === "efetuado") await supabaseAdmin.from("aportes").update({ status: "resgatado_total" }).eq("id", b.aporte_id);
-
   // devolve cautelas ao estoque (securitizadora)
-  if (status === "efetuado") {
-    if (tipo === "total") {
-      await supabaseAdmin.from("cautelas").update({ status: "disponivel", aporte_id: null }).eq("aporte_id", b.aporte_id);
-    } else {
-      const devolver = Array.isArray(b.cautela_ids) ? b.cautela_ids : [];
-      if (devolver.length > 0) {
-        await supabaseAdmin.from("cautelas").update({ status: "disponivel", aporte_id: null }).in("id", devolver).eq("aporte_id", b.aporte_id);
-      }
-    }
+  if (status === "efetuado" && cautelasDevolvidas.length > 0) {
+    await supabaseAdmin.from("cautelas").update({ status: "disponivel", aporte_id: null }).in("id", cautelasDevolvidas);
   }
-  return NextResponse.json({ ok: true, valorBruto, iofRetido: iof, irRetido: trib.irRetido, aliquota: trib.aliquota, valorLiquido, status });
+  return NextResponse.json({ ok: true, valorBruto, iofRetido: iof, irRetido: trib.irRetido, aliquota: trib.aliquota, valorLiquido, status, cautelasDevolvidas });
 }
