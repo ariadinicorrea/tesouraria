@@ -8,6 +8,8 @@ export async function POST(req: Request) {
   const valor = Number(String(b.valor ?? "").replace(",", ".")) || 0;
   const quantidade = parseInt(String(b.quantidade ?? ""), 10) || 0;
   const inicio = parseInt(String(b.codigo_inicial ?? ""), 10) || 0;
+  const data_emissao = b.data_emissao ? String(b.data_emissao).slice(0, 10) : null;
+  const data_vencimento = b.data_vencimento ? String(b.data_vencimento).slice(0, 10) : null;
 
   if (!empresa_id) return NextResponse.json({ ok: false, erro: "Selecione a empresa." }, { status: 400 });
   if (!serie) return NextResponse.json({ ok: false, erro: "Informe a série/emissão." }, { status: 400 });
@@ -17,7 +19,7 @@ export async function POST(req: Request) {
 
   const linhas = [];
   for (let i = 0; i < quantidade; i++) {
-    linhas.push({ empresa_id, serie, codigo: inicio + i, valor, status: "disponivel" });
+    linhas.push({ empresa_id, serie, codigo: inicio + i, valor, status: "disponivel", data_emissao, data_vencimento });
   }
 
   const { error, data } = await supabaseAdmin.from("cautelas").insert(linhas).select("id");
@@ -52,13 +54,15 @@ export async function PATCH(req: Request) {
   const { data: c } = await supabaseAdmin.from("cautelas").select("status").eq("id", id).maybeSingle();
   if (!c) return NextResponse.json({ ok: false, erro: "Cautela não encontrada." }, { status: 404 });
   if (c.status === "vendida") return NextResponse.json({ ok: false, erro: "Cautela vendida não pode ser editada." }, { status: 400 });
-  const upd = {};
+  const upd: Record<string, any> = {};
   if (b.serie !== undefined) upd.serie = String(b.serie).trim();
   if (b.valor !== undefined) {
     const v = Number(String(b.valor).replace(",", ".")) || 0;
     if (v <= 0) return NextResponse.json({ ok: false, erro: "Valor deve ser maior que zero." }, { status: 400 });
     upd.valor = v;
   }
+  if (b.data_emissao !== undefined) upd.data_emissao = b.data_emissao ? String(b.data_emissao).slice(0, 10) : null;
+  if (b.data_vencimento !== undefined) upd.data_vencimento = b.data_vencimento ? String(b.data_vencimento).slice(0, 10) : null;
   const { error } = await supabaseAdmin.from("cautelas").update(upd).eq("id", id);
   if (error) return NextResponse.json({ ok: false, erro: error.message }, { status: 400 });
   return NextResponse.json({ ok: true });

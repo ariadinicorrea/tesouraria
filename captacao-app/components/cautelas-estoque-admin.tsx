@@ -12,6 +12,8 @@ export function CautelasEstoqueAdmin({ empresas, cautelas, sugestoes }: { empres
   const [valor, setValor] = useState("");
   const [quantidade, setQuantidade] = useState("");
   const [codigoInicial, setCodigoInicial] = useState(String(sugestoes[empresas[0]?.id] ?? 1));
+  const [dataEmissao, setDataEmissao] = useState("");
+  const [dataVencimento, setDataVencimento] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
@@ -47,7 +49,7 @@ export function CautelasEstoqueAdmin({ empresas, cautelas, sugestoes }: { empres
   async function criarLote() {
     setSalvando(true); setErro(null); setMsg(null);
     try {
-      const res = await fetch("/api/cautelas-estoque", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ empresa_id: empresaId, serie, valor, quantidade, codigo_inicial: codigoInicial }) });
+      const res = await fetch("/api/cautelas-estoque", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ empresa_id: empresaId, serie, valor, quantidade, codigo_inicial: codigoInicial, data_emissao: dataEmissao, data_vencimento: dataVencimento }) });
       const j = await res.json();
       if (!j.ok) { setErro(j.erro); return; }
       setMsg(`${j.criadas} cautela(s) criada(s).`); window.location.reload();
@@ -99,6 +101,12 @@ export function CautelasEstoqueAdmin({ empresas, cautelas, sugestoes }: { empres
           </label>
           <label className="block text-sm">Código inicial (sugerido)
             <input value={codigoInicial} onChange={(e) => setCodigoInicial(e.target.value)} className="mt-1 w-full rounded-md border px-3 py-2" />
+          </label>
+          <label className="block text-sm">Data de emissão
+            <input type="date" value={dataEmissao} onChange={(e) => setDataEmissao(e.target.value)} className="mt-1 w-full rounded-md border px-3 py-2" />
+          </label>
+          <label className="block text-sm">Data de vencimento
+            <input type="date" value={dataVencimento} onChange={(e) => setDataVencimento(e.target.value)} className="mt-1 w-full rounded-md border px-3 py-2" />
           </label>
         </div>
         {previa && <p className="mt-3 text-sm text-muted">Vai criar cautelas <b className="text-ink">{previa.de}</b> a <b className="text-ink">{previa.ate}</b> · total <b className="text-ink">{fmtBRL(previa.total)}</b></p>}
